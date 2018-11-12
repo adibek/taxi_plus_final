@@ -1,0 +1,16 @@
+#table-sections tr:hover, #table-categories tr:hover, #table-subcategories tr:hover {
+    background-color: #c4e5ff;
+    cursor: pointer;
+}
+
+.section-active {
+    background-color: #4eb0fd !important;
+    color:white;
+}
+.section-active:hover {
+    background-color: #4eb0fd !important;
+}
+
+.section-weight:hover {
+    opacity:0.6;
+}

@@ -1,0 +1,66 @@
+Options +FollowSymLinks -MultiViews
+
+
+AddDefaultCharset utf-8
+AddCharset utf-8 *
+
+
+php_value short_open_tag 1
+
+
+RewriteCond %{REQUEST_URI} ^(.*)/{2,}(.*)$
+RewriteRule . %1/%2 [R=301,L]
+
+<IfModule mod_charset.c>
+	CharsetSourceEnc utf-8
+	CharsetDefault utf-8
+</IfModule> 
+
+<IfModule mod_rewrite.c>
+    Options +FollowSymlinks
+    RewriteEngine On
+</IfModule>
+
+ 
+<IfModule mod_rewrite.c>
+    # deal with api
+    RewriteCond %{REQUEST_URI} ^/(api)
+    RewriteRule ^api/assets/(.*)$ rest-api/web/assets/$1 [L]
+    RewriteRule ^api/css/(.*)$ rest-api/web/css/$1 [L]
+    RewriteRule ^api/js/(.*)$ rest-api/web/js/$1 [L]
+
+    RewriteCond %{REQUEST_URI} !^/rest-api/web/(assets|css)/
+    RewriteCond %{REQUEST_URI} ^/(api)
+    RewriteRule ^.*$ rest-api/web/index.php [L]
+
+
+    # deal with admin first
+    RewriteCond %{REQUEST_URI} ^/(profile)
+    RewriteRule ^profile/assets/(.*)$ backend/web/assets/$1 [L]
+    RewriteRule ^profile/css/(.*)$ backend/web/css/$1 [L]
+    RewriteRule ^profile/js/(.*)$ backend/web/js/$1 [L]
+    RewriteRule ^profile/uploads/(.*)$ backend/web/uploads/$1 [L]
+    RewriteRule ^profile/images/(.*)$ backend/web/images/$1 [L]
+
+    RewriteRule ^profile/files/css/(.*)$ backend/web/files/css/$1 [L]
+    RewriteRule ^profile/files/js/(.*)$ backend/web/files/js/$1 [L]
+    RewriteRule ^profile/files/images/(.*)$ backend/web/files/images/$1 [L]
+
+    RewriteCond %{REQUEST_URI} !^/backend/web/(assets|css)/
+    RewriteCond %{REQUEST_URI} ^/(profile)
+    RewriteRule ^.*$ backend/web/index.php [L]
+
+    RewriteCond %{REQUEST_URI} ^/(assets|css|js|images)
+    RewriteRule ^assets/(.*)$ frontend/web/assets/$1 [L]
+    RewriteRule ^css/(.*)$ frontend/web/css/$1 [L]
+    RewriteRule ^js/(.*)$ frontend/web/js/$1 [L]
+    RewriteRule ^images/(.*)$ frontend/web/images/$1 [L]
+    RewriteRule ^images/(.*)$ frontend/web/src/uploads/global/$1 [L]
+    RewriteRule ^(.*)$ frontend/web/$1 [L]
+
+    RewriteCond %{REQUEST_URI} !^/(frontend|backend)/web/(assets|css|js)/
+    RewriteCond %{REQUEST_URI} !index.php
+    RewriteCond %{REQUEST_FILENAME} !-f [OR]
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^.*$ frontend/web/index.php
+</IfModule>
