@@ -30,10 +30,16 @@ class TaxiParkController extends Controller
             } else {
                 $model = new TaxiPark();
             }
+
             $model->attributes = $_POST['Information'];
             $model->city_id = $_POST['city_id'];
             $model->type = $_POST['payment'];
-            $model->save();
+            $model->sum = $_POST['sum'];
+            $model->km = $_POST['km'];
+            $model->tg = $_POST['tg'];
+            $model->percent = $_POST['dole_tp'];
+            $model->company_name = $_POST['company_name'];
+
             if ($model->save()) {
 
                 if($id != null){
