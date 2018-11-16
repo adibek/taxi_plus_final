@@ -31,14 +31,46 @@ use backend\models\Users;
 
                     </ul>
                 </li>
+               <li class="nav-item"><a id = "traffic" href="traffic" class = "cs-link"><i class="icon-cash2"></i> Оборот монет </a></li>
+
+
                <?
+           }elseif (Yii::$app->session->get('profile_role') == 3){
+               ?>
+
+               <li class="nav-item"><a id = "orders" href="orders" class = "cs-link"><i class="icon-car"></i>Поездки</a></li>
+               <li class="nav-item"><a id = "admins/moderators" data-id="0"  class="action-link" href="admins/moderators"><i class="icon-user-check"></i>Модераторы</a></li>
+               <li class="nav-item"><a id = "taxi-parks" href="taxi-parks" class = "cs-link"><i class="icon-office"></i>Таксопарки</a></li>
+               <li class="nav-item"><a id = "tadmins" href="tadmins" class = "cs-link"><i class="icon-users2"></i>Администраторы таксопарков</a></li>
+               <li class="nav-item"><a id = "companies" href="companies" class = "cs-link"><i class="icon-home7"></i>Компании</a></li>
+               <li class="nav-item"><a id = "cadmins" href="cadmins" class = "cs-link"><i class="icon-users4"></i>Администраторы компаний</a></li>
+
+
+
+               <li>
+                   <a href="#"><i class="icon-statistics"></i> <span>Статистика</span></a>
+                   <ul>
+                       <li class="nav-item" ><a id = "stats-orders" href="stats-orders" class = "cs-link">По заказам</a></li>
+                       <li class="nav-item" ><a id = "stats-referals" href="stats-referals" class = "cs-link">По рефералам</a></li>
+                       <li class="nav-item" ><a id = "stats-drivers" href="stats-drivers" class = "cs-link">По водителям</a></li>
+                       <li class="nav-item" ><a id = "stats-clients" href="stats-clients" class = "cs-link">По клиентам</a></li>
+                       <li class="nav-item" ><a id = "stats-tp" href="stats-tp" class = "cs-link">По таксопаркам</a></li>
+                       <li class="nav-item" ><a id = "stats-companies" href="stats-companies" class = "cs-link">По компаниям</a></li>
+
+                   </ul>
+               </li>
+               <li class="nav-item"><a id = "traffic" href="traffic" class = "cs-link"><i class="icon-cash2"></i> Оборот монет </a></li>
+
+
+               <?
+
            }?>
 
 
 
 
             <?php
-                if(Yii::$app->session->get("profile_role") == 3){
+                if(Yii::$app->session->get("profile_role") == 5){
                     $drivers_count = count(Users::find()->where(['role_id' => 2])->andWhere(['is_active' => 0])->all());
                     if($drivers_count != 0){
                         $count_drivers_text = '<span class="label bg-orange-400">'. $drivers_count .'</span>';
@@ -93,7 +125,7 @@ use backend\models\Users;
                 <?
             }?>
             <?php
-            if(Yii::$app->session->get("profile_role") == 3){
+            if(Yii::$app->session->get("profile_role") == 11){
                 ?>
 <!--                <li class="nav-item"><a id = "traffic" href="traffic" class = "cs-link"><i class="icon-office"></i>Оборот монет</a></li>-->
                 <li class="nav-item"><a id = "cashiers" href="cashiers" class = "cs-link"><i class="icon-cash4"></i>Кассиры</a></li>

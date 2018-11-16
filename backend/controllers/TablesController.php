@@ -5,6 +5,7 @@ use backend\models\SpecificOrders;
 use backend\models\SystemUsers;
 use backend\models\Orders;
 use backend\models\Queries;
+use backend\models\SystemUsersCities;
 use backend\models\TaxiPark;
 use backend\models\Users;
 use Yii;
@@ -548,24 +549,60 @@ class TablesController extends Controller
             else if ($name == "orders") {
                 $recordsTotal = Orders::find()->andWhere($query)->andWhere(['order_type' => $_GET['id']])->count();
                 $recordsFiltered = Orders::find()->andWhere($condition)->andWhere(['order_type' => $_GET['id']])->andWhere($query)->andWhere($search_condition)->count();
-                $model = (new \yii\db\Query())
-                    ->select('`orders`.`id`,
+                if(Yii::$app->session->get('profile_role') == 9){
+                    $model = (new \yii\db\Query())
+                        ->select('`orders`.`id`,
                          `users`.`name` as uname,
                          `users`.`phone`,
                          `orders`.`price`,
                          `orders`.`status`,
                          `taxi_park`.`name` as tname,
                          `orders`.`created`'
-                    )
-                    ->from($table)
-                    ->where($query)
-                    ->andWhere($condition)
-                    ->andWhere(['order_type' => $_GET['id']])
-                    ->innerJoin('users', 'users.id = orders.user_id')
-                    ->innerJoin('taxi_park', 'taxi_park.id = orders.taxi_park_id')
-                    ->limit($length)
-                    ->offset($start)
-                    ->all();
+                        )
+                        ->from($table)
+                        ->where($query)
+                        ->andWhere($condition)
+                        ->andWhere(['order_type' => $_GET['id']])
+                        ->innerJoin('users', 'users.id = orders.user_id')
+                        ->innerJoin('taxi_park', 'taxi_park.id = orders.taxi_park_id')
+                        ->limit($length)
+                        ->offset($start)
+                        ->all();
+                }elseif (Yii::$app->session->get('profile_role') == 3){
+                    $me = SystemUsers::findOne(['id' => Yii::$app->session->get('profile_id')]);
+                    $my_cities = SystemUsersCities::find()->where(['system_user_id' => $me->id])->all();
+                    $in = '';
+                    foreach ($my_cities as $k => $v){
+                        if($k == count($my_cities) - 1){
+                            $in .= $v->city_id;
+                        }else{
+                            $in .= $v->city_id . ', ';
+                        }
+                        $cond = 'cities.id in (' . $in . ')';
+                    }
+
+                    $model = (new \yii\db\Query())
+                        ->select('`orders`.`id`,
+                         `users`.`name` as uname,
+                         `users`.`phone`,
+                         `orders`.`price`,
+                         `orders`.`status`,
+                         `taxi_park`.`name` as tname,
+                         `orders`.`created`'
+                        )
+                        ->from($table)
+                        ->where($query)
+                        ->andWhere($condition)
+                        ->andWhere(['order_type' => $_GET['id']])
+                        ->innerJoin('users', 'users.id = orders.user_id')
+                        ->innerJoin('taxi_park', 'taxi_park.id = orders.taxi_park_id')
+                        ->innerJoin('cities', 'cities.id = users.city_id')
+                        ->andWhere($cond)
+                        ->limit($length)
+                        ->offset($start)
+                        ->all();
+                }
+
             }
             else if ($name == "specific_orders") {
                 $recordsTotal = SpecificOrders::find()->andWhere($query)->andWhere(['order_type_id' => $_GET['id']])->count();
