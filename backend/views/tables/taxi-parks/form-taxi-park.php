@@ -34,6 +34,9 @@ use backend\models\RadialPricing;
                         <?
                         $list = WorkingTypes::find()->all();
                         $cities = Cities::find()->all();
+                        if(\backend\components\Helpers::getMyRole() == 3){
+                            $cities = Cities::find()->where('id in ('.\backend\components\Helpers::getCitiesString().')')->all();
+                        }
                         ?>
 
 

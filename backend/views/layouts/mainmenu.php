@@ -64,6 +64,12 @@ use backend\models\Users;
 
                <?
 
+           }elseif (Helpers::getMyRole() == 4){
+               ?>
+               <li class="nav-item"><a id = "orders" href="orders" class = "cs-link"><i class="icon-car"></i>Поездки</a></li>
+               <li class="nav-item"><a id = "drivers" href="drivers" class = "cs-link"><i class="icon-car2"></i>Водители </a></li>
+               <li class="nav-item"><a id = "users" href="users" class = "cs-link"><i class="icon-users4"></i>Клиенты</a></li>
+               <?
            }?>
 
 

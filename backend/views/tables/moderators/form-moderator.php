@@ -36,7 +36,13 @@ use backend\models\Category;
 
                     </div>
 
-                <?$list = \backend\models\TaxiPark::find()->all();?>
+                <?
+
+                    $list = \backend\models\TaxiPark::find()->all();
+                    if(\backend\components\Helpers::getMyRole() == 3){
+                        $list = \backend\models\TaxiPark::find()->innerJoin('cities', 'cities.id = taxi_park.city_id')->andWhere(\backend\components\Helpers::getCitiesCondition())->all();
+                    }
+                ?>
                     <div class="col-md-6" style="padding-top: 2em; padding-bottom: 2em;">
                         <label class = "text-semibold">Таксопарк:</label>
                         <select id="model" name = "taxi_park" class="select" required ="required">

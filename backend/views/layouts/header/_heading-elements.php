@@ -6,9 +6,19 @@
         else if ($page == "admins") { ?>
             <a data-id = "0" href="admins/form-admin" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить администратора<span class="legitRipple-ripple"></span></a>
         <? } else if ($page == "tadmins") {?>
-            <a data-id = "0" href="tadmins/form-tadmin" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить администратора<span class="legitRipple-ripple"></span></a>
+        <? if(\backend\components\Helpers::getMyRole() == 9) {
+        ?>
+                <a data-id = "0" href="tadmins/form-tadmin" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить администратора<span class="legitRipple-ripple"></span></a>
+                <?
+        } ?>
+
         <? } else if ($page == "taxi-parks") {?>
-                <a data-id = "-1" href="taxi-parks/form-taxi-park" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить таксопарк<span class="legitRipple-ripple"></span></a>
+            <? if(\backend\components\Helpers::getMyRole() == 9) {
+                ?>
+                 <a data-id = "-1" href="taxi-parks/form-taxi-park" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить таксопарк<span class="legitRipple-ripple"></span></a>
+                <?
+            }?>
+
 
         <? } else if ($page == "drivers") {?>
         <a data-id = "0" href="drivers/form-driver" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить водителя<span class="legitRipple-ripple"></span></a>

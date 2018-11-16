@@ -1,6 +1,8 @@
 <?php
     namespace backend\components;
-    use backend\models\TaxiPark;
+    use backend\models\SystemUsers;
+use backend\models\SystemUsersCities;
+use backend\models\TaxiPark;
 use backend\models\Users;
 use Yii;
 
@@ -10,7 +12,41 @@ use Yii;
             $password = substr( str_shuffle( $chars ), 0, 8 );
             return $password;
         }
-
+        public static function getCitiesCondition(){
+            $me = SystemUsers::findOne(['id' => Yii::$app->session->get('profile_id')]);
+            $my_cities = SystemUsersCities::find()->where(['system_user_id' => $me->id])->all();
+            $in = '';
+            foreach ($my_cities as $k => $v){
+                if($k == count($my_cities) - 1){
+                    $in .= $v->city_id;
+                }else{
+                    $in .= $v->city_id . ', ';
+                }
+            }
+            $cond = 'cities.id in (' . $in . ')';
+            return $cond;
+        }
+        public static function getMyTaxipark(){
+            $me = SystemUsers::findOne(['id' => Yii::$app->session->get('profile_id')]);
+            return $me->taxi_park_id;
+        }
+        public static function getCitiesString(){
+            $me = SystemUsers::findOne(['id' => Yii::$app->session->get('profile_id')]);
+            $my_cities = SystemUsersCities::find()->where(['system_user_id' => $me->id])->all();
+            $in = '';
+            foreach ($my_cities as $k => $v){
+                if($k == count($my_cities) - 1){
+                    $in .= $v->city_id;
+                }else{
+                    $in .= $v->city_id . ', ';
+                }
+                //        $cond = 'cities.id in (' . $in . ')';
+            }
+            return $in;
+        }
+        public static function getMyRole(){
+            return Yii::$app->session->get('profile_role');
+        }
         public static function CheckAuth($type, $link) {
             if (Yii::$app->session->get('profile_auth') == "OK" AND Yii::$app->session->get('profile_ip') == $_SERVER['REMOTE_ADDR']) {
                 $auth = true;

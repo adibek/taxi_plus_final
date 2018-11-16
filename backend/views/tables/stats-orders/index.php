@@ -1,7 +1,8 @@
-<!--<script type="text/javascript" src="/profile/files/js/mytables/orders/index.js"></script>-->
+    <!--<script type="text/javascript" src="/profile/files/js/mytables/orders/index.js"></script>-->
 <?php
 use backend\models\Orders;
 use backend\models\SpecificOrders;
+use backend\components\Helpers;
 ?>
 <?=$this->render("/layouts/header/_header")?>
 
@@ -11,17 +12,22 @@ use backend\models\SpecificOrders;
             <div class="panel">
                 <div class="panel-body" >
 <?
-$ekonom1 = Orders::find()->where(['order_type' => 1])->andWhere(['status' => 5])->count();
-$ekonom2 = Orders::find()->where(['order_type' => 1])  ->andWhere(['or', ['status'=>0], ['deleted'=>1]])->count();
+$cond = "orders.id IS NOT NULL";
+if(Helpers::getMyRole() == 3){
+        $cond = Helpers::getCitiesCondition();
+}
 
-$komfort1 = Orders::find()->where(['order_type' => 2])->andWhere(['status' => 5])->count();
-$komfort2 = Orders::find()->where(['order_type' => 2])  ->andWhere(['or', ['status'=>0], ['deleted'=>1]])->count();
+$ekonom1 = Orders::find()->where(['order_type' => 1])->andWhere(['status' => 5])->innerJoin('users', 'users.id = orders.user_id')->innerJoin('cities', 'cities.id = users.city_id')->andWhere($cond)->count();
+$ekonom2 = Orders::find()->where(['order_type' => 1])  ->andWhere(['or', ['status'=>0], ['deleted'=>1]])->innerJoin('users', 'users.id = orders.user_id')->innerJoin('cities', 'cities.id = users.city_id')->andWhere($cond)->count();
 
-$kk1 = Orders::find()->where(['order_type' => 3])->andWhere(['status' => 5])->count();
-$kk2 = Orders::find()->where(['order_type' => 3])  ->andWhere(['or', ['status'=>0], ['deleted'=>1]])->count();
+$komfort1 = Orders::find()->where(['order_type' => 2])->andWhere(['status' => 5])->innerJoin('users', 'users.id = orders.user_id')->innerJoin('cities', 'cities.id = users.city_id')->andWhere($cond)->count();
+$komfort2 = Orders::find()->where(['order_type' => 2])  ->andWhere(['or', ['status'=>0], ['deleted'=>1]])->innerJoin('users', 'users.id = orders.user_id')->innerJoin('cities', 'cities.id = users.city_id')->andWhere($cond)->count();
 
-$lady1 = Orders::find()->where(['order_type' => 4])->andWhere(['status' => 5])->count();
-$lady2 = Orders::find()->where(['order_type' => 4])  ->andWhere(['or', ['status'=>0], ['deleted'=>1]])->count();
+$kk1 = Orders::find()->where(['order_type' => 3])->andWhere(['status' => 5])->innerJoin('users', 'users.id = orders.user_id')->innerJoin('cities', 'cities.id = users.city_id')->andWhere($cond)->count();
+$kk2 = Orders::find()->where(['order_type' => 3])  ->andWhere(['or', ['status'=>0], ['deleted'=>1]])->innerJoin('users', 'users.id = orders.user_id')->innerJoin('cities', 'cities.id = users.city_id')->andWhere($cond)->count();
+
+$lady1 = Orders::find()->where(['order_type' => 4])->andWhere(['status' => 5])->innerJoin('users', 'users.id = orders.user_id')->innerJoin('cities', 'cities.id = users.city_id')->andWhere($cond)->count();
+$lady2 = Orders::find()->where(['order_type' => 4])  ->andWhere(['or', ['status'=>0], ['deleted'=>1]])->innerJoin('users', 'users.id = orders.user_id')->innerJoin('cities', 'cities.id = users.city_id')->andWhere($cond)->count();
 
 $mejgorod = SpecificOrders::find()->where(['order_type_id' => 1])->count();
 $gruz = SpecificOrders::find()->where(['order_type_id' => 2])->count();
