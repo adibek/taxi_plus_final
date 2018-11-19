@@ -5,6 +5,7 @@ use backend\components\SendMail;
 use backend\components\Stats;
 
 use backend\models\MonetsTraffic;
+use backend\models\Users;
 use PHPExcel_Settings;
 use Yii;
 use backend\models\SystemUsersCities;
@@ -221,6 +222,28 @@ class SiteController extends Controller
         return $response;
     }
 
+    public function actionDriverBalance(){
+        $id = $_GET['id'];
+        $amount = $_GET['amount'];
+        $driver = Users::findOne(['id' => $id]);
+        $driver->balance += $amount;
+        if($driver->save()){
+            $response["type"] = 'success';
+        }else{
+            $response["type"] = 'error';
+        }
+        $log = new MonetsTraffic();
+        $log->sender_user_id = Yii::$app->session->get('profile_id');
+        $log->sender_tp_id = Helpers::getMyTaxipark();
+        $log->amount = $amount;
+        $log->reciever_user_id = $id;
+        $log->reciever_tp_id = $driver->taxi_park_id;
+        $log->date = strtotime('now');
+        $log->type_id = 1;
+        $log->save();
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return $response;
+    }
 
 
 }

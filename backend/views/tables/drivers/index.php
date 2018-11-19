@@ -1,4 +1,5 @@
 <script type="text/javascript" src="/profile/files/js/mytables/drivers/index.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 <?=$this->render("/layouts/header/_header")?>
 

@@ -8,8 +8,7 @@
     <div class="row">
         <div class="col-sm-12 col-lg-12">
             <div class="panel">
-                <div class="panel-body">
-                    <?=$this->render('/layouts/header/_filter', array('page' => $page))?>
+                   <?=$this->render('/layouts/header/_filter', array('page' => $page))?>
                     <table class="table">
                         <thead>
                         <tr>
