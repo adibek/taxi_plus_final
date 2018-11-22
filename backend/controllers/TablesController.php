@@ -9,6 +9,7 @@ use backend\models\SystemUsersCities;
 use backend\models\TaxiPark;
 use backend\models\Users;
 use Yii;
+use yii\log\Dispatcher;
 use yii\web\Controller;
 use yii\web\Response;
 use backend\components\Helpers;
@@ -248,7 +249,8 @@ class TablesController extends Controller
                     )
                     ->from($table)
                     ->where(['role_id' => 2])
-                    // ->andWhere($condition)
+
+
                     ->innerJoin('taxi_park', '`taxi_park`.`id` = `users`.`taxi_park_id`')
                     ->all();
             } else if ($name == "traffic") { //Producty
@@ -545,6 +547,7 @@ class TablesController extends Controller
                     ->limit($length)
                     ->offset($start)
                     ->all();
+            }
 
             else if ($name == "orders") {
                 $recordsTotal = Orders::find()->andWhere($query)->andWhere(['order_type' => $_GET['id']])->count();
@@ -641,6 +644,10 @@ class TablesController extends Controller
                     ->all();
             }
             else if ($name == "clients") {
+                $cond = 'users.id IS NOT NULL';
+                if(Helpers::getMyRole() == 4 OR Helpers::getMyRole() == 5){
+                    $cond = 'users.taxi_park_id = '. Helpers::getMyTaxipark();
+                }
                 $recordsTotal = Users::find()->andWhere($query)->andWhere(['role_id' => 1])->count();
                 $recordsFiltered = Users::find()->andWhere($condition)->andWhere(['role_id' => 1])->andWhere($query)->andWhere($search_condition)->count();
                 $model = (new \yii\db\Query())
@@ -648,6 +655,7 @@ class TablesController extends Controller
                     ->from('users')
                     ->where($query)
                     ->andWhere($condition)
+                    ->andWhere($cond)
                     ->andWhere(['users.role_id' => 1])
                     ->innerJoin('genders g', 'users.gender_id = g.id')
                     ->leftJoin('users parent', 'users.parent_id = parent.id')
@@ -676,7 +684,7 @@ class TablesController extends Controller
                         ->limit($length)
                         ->offset($start)
                         ->all();
-                }elseif (getMyRole() == 4){
+                }elseif (getMyRole() == 4 OR getMyRole() == 5){
                     $model = (new \yii\db\Query())
                         ->select('users.*, g.gender, users_cars.car_id, model.model, submodel.model as submodel, park.name as tp, users_cars.number, c.cname as city')
                         ->from($table)
@@ -832,7 +840,31 @@ class TablesController extends Controller
 
                 $model = $command->queryAll();
 
+            }elseif($name == "tp_moderators"){
+                $recordsTotal = SystemUsers::find()->where(['role_id' => 4])->andWhere($query)->andWhere(['taxi_park_id' => Helpers::getMyTaxipark()])->count();
+                $recordsFiltered = SystemUsers::find()->where(['role_id' => 4])->andWhere($condition)->andWhere($query)->andWhere($search_condition)->andWhere(['taxi_park_id' => Helpers::getMyTaxipark()])->count();
+
+                $sql = "SELECT su.id, su.first_name, su.last_name, su.last_edit, su.phone,
+                               group_concat(distinct c.cname) as cities,
+                               count(distinct driver.id)      as drivers,
+                               count(distinct client.id)      as clients,
+                               0 as sum
+                        from system_users su
+                               inner join system_users_cities suc on su.id = suc.system_user_id
+                               inner join cities c on suc.city_id = c.id
+                               left join users driver on driver.city_id = c.id and driver.role_id = 2
+                               left join users client on client.city_id = c.id and client.role_id = 1
+                        where su.role_id = 4
+                        and su.taxi_park_id = " . Helpers::getMyTaxipark() ."
+                        group by su.id;";
+
+                $connection = Yii::$app->getDb();
+                $command = $connection->createCommand($sql);
+
+                $model = $command->queryAll();
+
             }
+
             else if ($name == "stats-drivers") {
                 $recordsTotal = Users::find()->where(['role_id' => 2])->andWhere($query)->count();
                 $recordsFiltered = Users::find()->where(['role_id' => 2])->andWhere($condition)->andWhere($query)->andWhere($search_condition)->count();
@@ -865,6 +897,23 @@ class TablesController extends Controller
                         ->andWhere(['users.role_id' => 2])
                         ->andWhere($condition)
                         ->andWhere(getCitiesCondition())
+                        ->limit($length)
+                        ->offset($start)
+                        ->groupBy(['users.id', 'car.id'])
+                        ->all();
+                }elseif (getMyRole() == 5){
+                    $model = (new \yii\db\Query())
+                        ->select('users.id, genders.gender, users.name, users.rating, users.phone, users.created, users.balance, cities.cname as city, submodel.model submodel, car.number, model.model')
+                        ->from('users')
+                        ->innerJoin('cities', 'users.city_id = cities.id')
+                        ->leftJoin('users_cars car', 'users.id = car.user_id')
+                        ->leftJoin('car_models submodel', 'car.car_id = submodel.id')
+                        ->innerJoin('car_models model', 'submodel.parent_id = model.id')
+                        ->innerJoin('genders', 'users.gender_id = genders.id')
+                        ->where($query)
+                        ->andWhere(['users.role_id' => 2])
+                        ->andWhere($condition)
+                        ->andWhere('users.taxi_park_id = ' . Helpers::getMyTaxipark())
                         ->limit($length)
                         ->offset($start)
                         ->groupBy(['users.id', 'car.id'])
@@ -933,6 +982,19 @@ class TablesController extends Controller
                         ->offset($start)
                         ->groupBy('parent.id')
                         ->all();
+                }elseif(getMyRole() == 5){
+                    $model = (new \yii\db\Query())
+                        ->select('parent.id, parent.phone, parent.name, count(child.id) referals, c.cname as city, sum(distinct mt.amount) as bonuses')
+                        ->from('users child')
+                        ->innerJoin('users parent', 'parent.id=child.parent_id')
+                        ->innerJoin('cities c', 'parent.city_id = c.id')
+                        ->leftJoin('monets_traffic mt', 'mt.reciever_user_id = parent.id')
+                        ->andWhere(['mt.type_id' => 4])
+                        ->andWhere('parent.parent_id = '. Helpers::getMyTaxipark())
+                        ->limit($length)
+                        ->offset($start)
+                        ->groupBy('parent.id')
+                        ->all();
                 }
 
             }
@@ -964,6 +1026,19 @@ class TablesController extends Controller
                         ->groupBy('users.id')
                         ->all();
 
+                }elseif (getMyRole() == 5){
+                    $model = (new \yii\db\Query())
+                        ->select('users.id, users.name, users.phone, c.cname as city, users.created, count(distinct child.id) as referals, users.balance')
+                        ->from('users')
+                        ->leftJoin('users child', 'child.parent_id = users.id')
+                        ->innerJoin('cities c', 'users.city_id = c.id')
+                        ->where(['users.role_id' => 1])
+                        ->andWhere(['users.taxi_park_id' => Helpers::getMyTaxipark()])
+                        ->limit($length)
+                        ->offset($start)
+                        ->groupBy('users.id')
+                        ->all();
+
                 }
 
             }
@@ -981,6 +1056,33 @@ class TablesController extends Controller
                     ->where(['users.id' => $_GET['id']])
                     ->limit($length)
                     ->offset($start)
+                    ->all();
+            }
+            else if ($name == "dispatchers") {
+                $recordsTotal = SystemUsers::find()->andWhere($query)->andWhere(['role_id' => 8])->count();
+                $recordsFiltered = SystemUsers::find()->andWhere($condition)->andWhere(['role_id' => 8])->andWhere($query)->andWhere($search_condition)->count();
+                $model = (new \yii\db\Query())
+                    ->select('su.*, count(distinct  o.id) as orders, count(case when o.status = 0 then 1 end ) as cancelled')
+                    ->from('system_users su')
+                    ->leftJoin('orders o', 'su.id = o.dispatcher_id')
+                    ->where(['su.role_id' => 8])
+                    ->limit($length)
+                    ->offset($start)
+                    ->groupBy('su.id')
+                    ->all();
+            }
+            else if ($name == "dispatchers_orders") {
+                $recordsTotal = Orders::find()->andWhere($query)->andWhere(['dispatcher_id' => $_GET['id']])->count();
+                $recordsFiltered = Orders::find()->andWhere($condition)->andWhere(['dispatcher_id' => $_GET['id']])->andWhere($query)->andWhere($search_condition)->count();
+                $model = (new \yii\db\Query())
+                    ->select('o.*, u.id as uid, u.phone')
+                    ->from('orders o')
+                    ->innerJoin('system_users su', 'o.dispatcher_id = su.id')
+                    ->innerJoin('users u', 'o.user_id = u.id')
+                    ->where(['o.dispatcher_id' => $_GET['id']])
+                    ->limit($length)
+                    ->offset($start)
+                    ->groupBy('o.id')
                     ->all();
             }
             else if ($name == "taxi_park") {

@@ -34,7 +34,6 @@ $tps = \backend\models\TaxiPark::find()->where(['<>', 'id', 0])->sum('balance');
                             <td>Монеты таксопарков</td>
                             <td></td>
                         </tr>
-
                         <tr>
                             <td>Итого</td>
                             <td><?=$tp1?></td>

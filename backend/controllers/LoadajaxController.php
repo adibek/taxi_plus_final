@@ -4,6 +4,7 @@ namespace backend\controllers;
 use backend\components\Helpers;
 use backend\models\Cities;
 use backend\models\Company;
+use backend\models\Orders;
 use backend\models\SystemUsers;
 use backend\models\SystemUsersCities;
 use yii\web\Response;
@@ -106,6 +107,12 @@ class LoadajaxController extends Controller
                     $type = $_POST['id'];
                     $info = $_POST['info'];
                     return $this->renderPartial('/tables/' . $page, array("type" => $type, "info" => $info, "security" => $security));
+
+                }
+                else if ($page == "dispatchers/orders") {
+                    $type = $_POST['id'];
+
+                    return $this->renderPartial('/tables/' . $page, array("type" => $type, "security" => $security));
 
                 }
                 else if ($page == "admins/moderators") {

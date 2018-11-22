@@ -16,7 +16,9 @@ $cond = "orders.id IS NOT NULL";
 if(Helpers::getMyRole() == 3){
         $cond = Helpers::getCitiesCondition();
 }
-
+elseif(Helpers::getMyRole() == 5){
+    $cond = 'orders.taxi_park_id = ' . Helpers::getMyTaxipark();
+}
 $ekonom1 = Orders::find()->where(['order_type' => 1])->andWhere(['status' => 5])->innerJoin('users', 'users.id = orders.user_id')->innerJoin('cities', 'cities.id = users.city_id')->andWhere($cond)->count();
 $ekonom2 = Orders::find()->where(['order_type' => 1])  ->andWhere(['or', ['status'=>0], ['deleted'=>1]])->innerJoin('users', 'users.id = orders.user_id')->innerJoin('cities', 'cities.id = users.city_id')->andWhere($cond)->count();
 
@@ -41,10 +43,17 @@ $inva = SpecificOrders::find()->where(['order_type_id' => 4])->count();
                             <TH colspan="2">Комфорт</TH>
                             <TH colspan="2">Корп. клиенты</TH>
                             <TH colspan="2">Леди такси</TH>
-                            <TH colspan="1">Межгород</TH>
-                            <TH colspan="1">Грузотакси</TH>
-                            <TH colspan="1">Инватакси</TH>
-                            <TH colspan="1">Эвакуатор</TH>
+                            <?
+                            if(Helpers::getMyRole() != 5){
+                            ?>
+                                <TH colspan="1">Межгород</TH>
+                                <TH colspan="1">Грузотакси</TH>
+                                <TH colspan="1">Инватакси</TH>
+                                <TH colspan="1">Эвакуатор</TH>
+                            <?
+                            }
+                            ?>
+
                         </TR>
                         <TR>
                             <td></td>
@@ -56,10 +65,17 @@ $inva = SpecificOrders::find()->where(['order_type_id' => 4])->count();
                             <TH>Не отработанные</TH>
                             <TH>Отработанные</TH>
                             <TH>Не отработанные</TH>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <?
+                            if(Helpers::getMyRole() != 5){
+                                ?>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <?
+                            }
+                            ?>
+
                         </TR>
                         <TR>
                             <td></td>
@@ -71,10 +87,17 @@ $inva = SpecificOrders::find()->where(['order_type_id' => 4])->count();
                             <TD><?=$kk2?></TD>
                             <TD><?=$lady1?></TD>
                             <TD><?=$lady2?></TD>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <?
+                            if(Helpers::getMyRole() != 5){
+                                ?>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <?
+                            }
+                            ?>
+
                         </TR>
                         <TR>
                             <td>Итого</td>
@@ -82,10 +105,17 @@ $inva = SpecificOrders::find()->where(['order_type_id' => 4])->count();
                             <TH colspan="2"><?=$komfort2 + $komfort1?></TH>
                             <TH colspan="2"><?= $kk2 + $kk1?></TH>
                             <TH colspan="2"><?= $lady2 + $lady1?></TH>
-                            <TH colspan="1"><?=$mejgorod?></TH>
-                            <TH colspan="1"><?=$gruz?></TH>
-                            <TH colspan="1"><?=$inva?></TH>
-                            <TH colspan="1"><?=$evak?></TH>
+                            <?
+                            if(Helpers::getMyRole() != 5){
+                                ?>
+                                <TH colspan="1"><?=$mejgorod?></TH>
+                                <TH colspan="1"><?=$gruz?></TH>
+                                <TH colspan="1"><?=$inva?></TH>
+                                <TH colspan="1"><?=$evak?></TH>
+                                <?
+                            }
+                            ?>
+
                         </TR>
 
 

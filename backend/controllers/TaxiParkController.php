@@ -27,13 +27,15 @@ class TaxiParkController extends Controller
             $id = $_POST['id'];
             if ($id != null) {
                 $model = TaxiPark::find()->where(['id' => $id])->one();
+
             } else {
                 $model = new TaxiPark();
+                $model->type = $_POST['payment'];
+
             }
 
             $model->attributes = $_POST['Information'];
             $model->city_id = $_POST['city_id'];
-            $model->type = $_POST['payment'];
             $model->sum = $_POST['sum'];
             $model->km = $_POST['km'];
             $model->tg = $_POST['tg'];
@@ -41,7 +43,40 @@ class TaxiParkController extends Controller
             $model->company_name = $_POST['company_name'];
 
             if ($model->save()) {
+                (new Query)
+                    ->createCommand()
+                    ->delete('taxi_park_services', ['taxi_park_id' => $model->id])
+                    ->execute();
 
+                foreach ($_POST['service'] as $key => $value){
+
+
+
+                    if($_POST['call'][$key] != null){
+                        $tps = new TaxiParkServices();
+                        $tps->session_price = $_POST['session_price'][$key];
+                        $tps->session_price_unlim = $_POST['session_price_unlim'][$key];
+                        $tps->commision_percent = $_POST['percent'][$key];
+                        $tps->taxi_park_id = $model->id;
+                        $tps->service_id = $value;
+                        $tps->call_price = $_POST['call'][$key];
+                        $tps->km_price = $_POST['km'][$key];
+                        $tps->save();
+
+                    }else{
+                        foreach ($_POST['tenge'][$key] as $k => $v){
+                            $tps = new TaxiParkServices();
+                            $tps->session_price = $_POST['session_price'][$key];
+                            $tps->session_price_unlim = $_POST['session_price_unlim'][$key];
+                            $tps->taxi_park_id = $model->id;
+                            $tps->service_id = $value;
+                            $tps->commision_percent = $_POST['percent'][$key];
+                            $tps->tenge = $v;
+                            $tps->meters = $_POST['meters'][$key][$k];
+                            $tps->save();
+                        }
+                    }
+                }
                 if($id != null){
                     $response['message'] = "Таксопарк изменен";
                 }else{

@@ -1,5 +1,3 @@
-<!--<script type="text/javascript" src="/profile/files/js/mytables/drivers/index.js"></script>-->
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 <?=$this->render("/layouts/header/_header")?>
 
@@ -12,15 +10,14 @@
                     <table class="table">
                         <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Имя</th>
-                            <th>Пол</th>
-                            <th>Марка автомобиля</th>
-                            <th>Гос. номер</th>
-                            <th>Регион</th>
-                            <th>Таксопарк</th>
-                            <th>Баланс</th>
-                            <th>Дата регистрации</th>
+                            <th>ID заказа</th>
+                            <th>ID клиента</th>
+                            <th>Дата</th>
+                            <th>Телефон
+                                клиента</th>
+                            <th>Сумма</th>
+                            <th>Статус заказа</th>
+
                         </tr>
                         </thead>
                         <tbody>
@@ -80,7 +77,7 @@
             "ajax":{
                 url :"/profile/tables/get-new-table/",
                 type: "GET",
-                data: {"_csrf-backend":token, table:"users", name:"drivers"}
+                data: {"_csrf-backend":token, table:"orders", name:"dispatchers_orders", id:<?=$type?>}
             },
             "stateSave": true,
             "stateSaveCallback": function (settings, data) { //Сохраняем таблицу (Страница, Сортировка, Количество записей и т.д)
@@ -109,49 +106,14 @@
                 {"mData": {},
                     "mRender": function (data, type, row) {
                         // return '<span style="float:left;">' + data.id + '</span><span style="float:right; margin-top: 2px;"><ul class="icons-list" style="float:left;"><li><a class="action-link" data-id="'+ data.id +'" title = "Редактировать" href="admins/form-admin"><i style="font-size:0.9em; margin-top:2px;" class="icon-pencil"></i></a></li></ul></span>';
-                        return '<label class="text-semibold">' + data.id + '</label>';
-                    }
-                },
-                {"mData": {},
-                    "mRender": function (data, type, row) {
 
-                        return '<label class="text-semibold">'+ data.name + '</label>';
-                    }
-                },
-                {"mData": {},
-                    "mRender": function (data, type, row) {
-                        return '<label class="text-semibold">'+ data.gender +'</label>';
-                    }
-                },
-                {"mData": {},
-                    "mRender": function (data, type, row) {
-
-                        return '<label class="text-semibold">'+ data.model + ' ' + data.submodel + '</label>';
-                    }
-                },
-                {"mData": {},
-                    "mRender": function (data, type, row) {
-
-                        return '<label class="text-semibold">'+ data.number + '</label>';
-                    }
-                },
-                {"mData": {},
-                    "mRender": function (data, type, row) {
-
-                        return '<label class="text-semibold">'+ data.city + '</label>';
+                        return '<label class="text-semibold">'+ data.id + '</label>';
                     }
                 },
 
                 {"mData": {},
                     "mRender": function (data, type, row) {
-
-                        return '<label class="text-semibold">'+ data.tp + '</label>';
-                    }
-                },
-                {"mData": {},
-                    "mRender": function (data, type, row) {
-
-                        return '<label class="text-semibold">'+ data.balance + '</label>';
+                        return '<label class="text-semibold">'+ data.uid + '</label>';
                     }
                 },
                 {"mData": {},
@@ -160,64 +122,48 @@
                         return '<label class="text-semibold">'+ timeConverter(data.created) + '</label>';
                     }
                 },
-                <?
-                if(\backend\components\Helpers::getMyRole() == 4){
-                    ?>
+
                 {"mData": {},
                     "mRender": function (data, type, row) {
 
-                        return '<button class="btn btn-primary" data-name="'+ data.name +'" data-id="'+ data.id  +'" type="button">Пополнить счет</button>';
+                        return '<label class="text-semibold">'+ data.phone + '</label>';
+                    }
+                },
+                {"mData": {},
+                    "mRender": function (data, type, row) {
+
+                        return '<label class="text-semibold">'+ data.price + '</label>';
+                    }
+                },
+                {"mData": {},
+                    "mRender": function (data, type, row) {
+                    var status = '';
+                        switch (data.status) {
+                            case 0:
+                                status = 'Отменен';
+                                break;
+                            case 1:
+                                status = 'В ожидании';
+                                break;
+                            case 2:
+                                status = 'В пути';
+                                break;
+                            case 3:
+                                status = 'В пути';
+                                break;
+                            case 4:
+                                status = 'В пути';
+                                break;
+                            default:
+                                status = 'Завершен';
+                                break;
+                        }
+                        return '<label class="text-semibold">'+ status + '</label>';
                     }
                 }
-                <?
-                }
-                ?>
-
             ]
         });
 
-        $('.table').on( 'draw.dt', function () {
-            $(".btn").on('click', function () {
-
-                var th = $(this);
-                console.log(th.data("id"));
-                swal({
-                    text: 'Введите количество монет для ' + th.data("name"),
-                    content: "input",
-                    button: {
-                        text: "Пополнить",
-                        closeModal: false,
-                    },
-                })
-                    .then(name => {
-                        if (!name) throw null;
-
-                        return fetch(`site/driver-balance/?amount=${name}&id=${th.data("id")}`);
-                    })
-                    .then(results => {
-                        return results.json();
-                    })
-                    .then(json => {
-                        const movie = json.type;
-                        if(movie === 'success'){
-                            swal({
-                                title: "Баланс успешно пополнен",
-                                text: ''
-                            });
-                        }
-
-                    })
-                    .catch(err => {
-                        if (err) {
-                            swal("Oh noes!", "The AJAX request failed!", "error");
-                        } else {
-                            swal.stopLoading();
-                            swal.close();
-                        }
-                    });
-
-            });
-        } );
         $('.dataTables_length select').select2({
             minimumResultsForSearch: Infinity,
             width: 'auto'

@@ -10,7 +10,7 @@ use backend\models\Users;
            <? if(Yii::$app->session->get('profile_role') == 9) {
                ?>
                <li class="nav-item"><a id = "admins" href="admins" class = "cs-link"><i class="icon-users"></i>Администраторы</a></li>
-               <li class="nav-item"><a id = "orders" href="orders" class = "cs-link"><i class="icon-car"></i>Поездки</a></li>
+               <li class="nav-item"><a id = "orders" href="orders" class = "cs-link"><i class="icon-car"></i>Лента заказов</a></li>
                <li class="nav-item"><a id = "admins/moderators" data-id="0"  class="action-link" href="admins/moderators"><i class="icon-user-check"></i>Модераторы</a></li>
                <li class="nav-item"><a id = "taxi-parks" href="taxi-parks" class = "cs-link"><i class="icon-office"></i>Таксопарки</a></li>
                <li class="nav-item"><a id = "tadmins" href="tadmins" class = "cs-link"><i class="icon-users2"></i>Администраторы таксопарков</a></li>
@@ -38,7 +38,7 @@ use backend\models\Users;
            }elseif (Yii::$app->session->get('profile_role') == 3){
                ?>
 
-               <li class="nav-item"><a id = "orders" href="orders" class = "cs-link"><i class="icon-car"></i>Поездки</a></li>
+               <li class="nav-item"><a id = "orders" href="orders" class = "cs-link"><i class="icon-car"></i>Лента заказов</a></li>
                <li class="nav-item"><a id = "admins/moderators" data-id="0"  class="action-link" href="admins/moderators"><i class="icon-user-check"></i>Модераторы</a></li>
                <li class="nav-item"><a id = "taxi-parks" href="taxi-parks" class = "cs-link"><i class="icon-office"></i>Таксопарки</a></li>
                <li class="nav-item"><a id = "tadmins" href="tadmins" class = "cs-link"><i class="icon-users2"></i>Администраторы таксопарков</a></li>
@@ -66,9 +66,30 @@ use backend\models\Users;
 
            }elseif (Helpers::getMyRole() == 4){
                ?>
-               <li class="nav-item"><a id = "orders" href="orders" class = "cs-link"><i class="icon-car"></i>Поездки</a></li>
+               <li class="nav-item"><a id = "orders" href="orders" class = "cs-link"><i class="icon-car"></i>Лента заказов</a></li>
                <li class="nav-item"><a id = "drivers" href="drivers" class = "cs-link"><i class="icon-car2"></i>Водители </a></li>
                <li class="nav-item"><a id = "users" href="users" class = "cs-link"><i class="icon-users4"></i>Клиенты</a></li>
+               <?
+           }elseif (Helpers::getMyRole() == 5){
+                ?>
+
+               <li class="nav-item"><a id = "orders" href="orders" class = "cs-link"><i class="icon-car"></i>Лента заказов</a></li>
+               <li class="nav-item"><a id = "moderators" href="moderators" class = "cs-link"><i class="icon-user-check"></i>Модераторы</a></li>
+               <li class="nav-item"><a id = "dispatchers" href="dispatchers" class = "cs-link"><i class="icon-user-check"></i>Диспетчеры</a></li>
+               <li class="nav-item"><a id = "drivers" href="drivers" class = "cs-link"><i class="icon-car2"></i>Водители </a></li>
+               <li class="nav-item"><a id = "users" href="users" class = "cs-link"><i class="icon-users4"></i>Клиенты</a></li>
+
+               <li>
+                   <a href="#"><i class="icon-statistics"></i> <span>Статистика</span></a>
+                   <ul>
+                       <li class="nav-item" ><a id = "stats-orders" href="stats-orders" class = "cs-link">По заказам</a></li>
+                       <li class="nav-item" ><a id = "stats-referals" href="stats-referals" class = "cs-link">По рефералам</a></li>
+                       <li class="nav-item" ><a id = "stats-drivers" href="stats-drivers" class = "cs-link">По водителям</a></li>
+                       <li class="nav-item" ><a id = "stats-clients" href="stats-clients" class = "cs-link">По клиентам</a></li>
+                   </ul>
+               </li>
+               <li class="nav-item"><a class="action-link" data-id="<?=Helpers::getMyTaxipark()?>"  href="taxi-parks/form-taxi-park"><i class="icon-office"></i>Настройка таксопарка</a></li>
+
                <?
            }?>
 
@@ -76,7 +97,7 @@ use backend\models\Users;
 
 
             <?php
-                if(Yii::$app->session->get("profile_role") == 5){
+                if(Yii::$app->session->get("profile_role") == 52){
                     $drivers_count = count(Users::find()->where(['role_id' => 2])->andWhere(['is_active' => 0])->all());
                     if($drivers_count != 0){
                         $count_drivers_text = '<span class="label bg-orange-400">'. $drivers_count .'</span>';
@@ -110,7 +131,7 @@ use backend\models\Users;
 
             ?>
             <?php
-            if(Yii::$app->session->get("profile_role") == 5) {
+            if(Yii::$app->session->get("profile_role") == 52) {
                 ?>
                 <li class="nav-item"><a id = "dispatchers" href="dispatchers" class = "cs-link"><i class="icon-users4"></i>Диспетчеры</a></li>
                 <li class="nav-item"><a id = "taxi-parks" href="taxi-parks" class = "cs-link"><i class="icon-office"></i>Таксопарки</a></li>

@@ -25,6 +25,8 @@ use backend\components\Helpers;
                             }
                             $cond = 'cities.id in (' . $in . ')';
                         }
+                    }elseif (Helpers::getMyRole() == 5){
+                        $cond = 'orders.taxi_park_id = ' . Helpers::getMyTaxipark();
                     }
 
                     $active_econom = count(\backend\models\Orders::find()->where(['in', 'status', [1, 2, 3, 4]])->andWhere(['order_type' => 1])->innerJoin('users', 'users.id = orders.user_id')->innerJoin('cities', 'cities.id = users.city_id')->andWhere($cond)->andWhere('orders.taxi_park_id = '. Helpers::getMyTaxipark())->all());
@@ -55,10 +57,19 @@ use backend\components\Helpers;
                                 <th>Комфорт</th>
                                 <th>КК</th>
                                 <th>Леди такси</th>
-                                <th>Межгород</th>
-                                <th>Грузотакси</th>
-                                <th>Инватакси</th>
-                                <th>Эвакуатор</th>
+                                <?
+                                if(Helpers::getMyRole() != 5){
+                                    ?>
+
+                                    <th>Межгород</th>
+                                    <th>Грузотакси</th>
+                                    <th>Инватакси</th>
+                                    <th>Эвакуатор</th>
+
+                                    <?
+                                }
+                                ?>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -91,10 +102,17 @@ use backend\components\Helpers;
                             <th><?=$cancelled_comfort + $active_comfort + $finished_comfort?></th>
                             <th><?=$cancelled_kk + $active_kk + $finished_kk?></th>
                             <th><?=$cancelled_lady + $active_lady + $finished_lady?></th>
-                            <th><?=$mejgorod?></th>
-                            <th><?=$gruz?></th>
-                            <th><?=$inva?></th>
-                            <th><?=$evak?></th>
+                            <?
+                            if(Helpers::getMyRole() != 5){
+                                ?>
+                                <th><?=$mejgorod?></th>
+                                <th><?=$gruz?></th>
+                                <th><?=$inva?></th>
+                                <th><?=$evak?></th>
+                                <?
+                            }
+                            ?>
+
                         </tr>
                         <tr>
                             <th></th>
@@ -102,11 +120,18 @@ use backend\components\Helpers;
                             <th><a data-id=2 data-info="Комфорт" class="action-link" href="orders/orders-list"><button class="btn btn-success" type="button">Просмотр</button></a></th>
                             <th><a data-id=3 data-info="Корпоративный клиент" class="action-link" href="orders/orders-list"><button class="btn btn-success" type="button">Просмотр</button></a></th>
                             <th><a data-id=4 data-info="Леди-такси" class="action-link" href="orders/orders-list"><button class="btn btn-success" type="button">Просмотр</button></a></th>
-                            <th><a data-id=1 data-info="Межгород" class="action-link" href="orders/orders-list"><button class="btn btn-success" type="button">Просмотр</button></a></th>
-                            <th><a data-id=2 data-info="Грузотакси" class="action-link" href="orders/orders-list"><button class="btn btn-success" type="button">Просмотр</button></a></th>
-                            <th><a data-id=4 data-info="Инватакси" class="action-link" href="orders/orders-list"><button class="btn btn-success" type="button">Просмотр</button></a></th>
-                            <th><a data-id=3 data-info="Эвакуатор" class="action-link" href="orders/orders-list"><button class="btn btn-success" type="button">Просмотр</button></a></th>
-                         </tr>
+                            <?
+                            if(Helpers::getMyRole() != 5){
+                                ?>
+                                <th><a data-id=1 data-info="Межгород" class="action-link" href="orders/orders-list"><button class="btn btn-success" type="button">Просмотр</button></a></th>
+                                <th><a data-id=2 data-info="Грузотакси" class="action-link" href="orders/orders-list"><button class="btn btn-success" type="button">Просмотр</button></a></th>
+                                <th><a data-id=4 data-info="Инватакси" class="action-link" href="orders/orders-list"><button class="btn btn-success" type="button">Просмотр</button></a></th>
+                                <th><a data-id=3 data-info="Эвакуатор" class="action-link" href="orders/orders-list"><button class="btn btn-success" type="button">Просмотр</button></a></th>
+
+                                <?
+                            }
+                            ?>
+                                                    </tr>
 
                         </tbody>
                     </table>
