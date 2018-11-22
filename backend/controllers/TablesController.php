@@ -135,22 +135,19 @@ class TablesController extends Controller
                     ->andWhere($condition)
                     ->all();
             }
-            else if ($name == "coworkers") { //Producty
-                $myId = Yii::$app->session->get('profile_id');
-                $me = Users::find()->where(['id' => $myId])->one();
+            else if ($name == "coworkers") {
                 $model = (new \yii\db\Query())
                     ->select('`id`,
                          `name`,
                          `phone`,
                          `last_edit`,
                          `created`,
-                         `email`,
                          `is_active`,
                          `company_id`'
                     )
                     ->from($table)
                     ->where(['role_id' => 1])
-                    ->andWhere(['company_id' => $me->company_id])
+                    ->andWhere(['company_id' => Helpers::getMyCompany()])
                     ->andWhere($condition)
                     ->all();
             }
@@ -612,6 +609,27 @@ class TablesController extends Controller
                         ->innerJoin('taxi_park', 'taxi_park.id = orders.taxi_park_id')
                         ->innerJoin('cities', 'cities.id = users.city_id')
                         ->andWhere('orders.taxi_park_id = '. Helpers::getMyTaxipark())
+                        ->limit($length)
+                        ->offset($start)
+                        ->all();
+                }elseif (getMyRole() == 7){
+                    $model = (new \yii\db\Query())
+                        ->select('`orders`.`id`,
+                         `users`.`name` as uname,
+                         `users`.`phone`,
+                         `orders`.`price`,
+                         `orders`.`status`,
+                         `taxi_park`.`name` as tname,
+                         `orders`.`created`'
+                        )
+                        ->from($table)
+                        ->where($query)
+                        ->andWhere($condition)
+                        ->andWhere(['order_type' => $_GET['id']])
+                        ->innerJoin('users', 'users.id = orders.user_id')
+                        ->innerJoin('taxi_park', 'taxi_park.id = orders.taxi_park_id')
+                        ->innerJoin('cities', 'cities.id = users.city_id')
+                        ->andWhere('orders.company_id = '. Helpers::getMyCompany())
                         ->limit($length)
                         ->offset($start)
                         ->all();

@@ -1,5 +1,6 @@
 <?php
 namespace backend\controllers;
+use backend\components\Helpers;
 use backend\models\SystemUsers;
 use backend\models\Users;
 use Yii;
@@ -36,7 +37,8 @@ class CompanyController extends Controller
     public function actionAddUser(){
         $id = $_POST["id"];
         $user = Users::find()->where(['id' => $id])->one();
-        $user->company_id = Yii::$app->session->get('company_id');
+        $user->company_id = Helpers::getMyCompany();
+        $response['id'] = $id;
         if($user->save()){
             $response['type'] = "success";
         }else{
@@ -95,7 +97,13 @@ class CompanyController extends Controller
 
     }
 
-
+    public function actionSearch(){
+        $phone = $_POST['phone'];
+        $result = Users::find()->where(['phone' => $phone])->andWhere(['company_id' => NULL])->all();
+        $response['users'] = $result;
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return $response;
+    }
 
 }
 

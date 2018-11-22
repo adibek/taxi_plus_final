@@ -91,6 +91,11 @@ use backend\models\Users;
                <li class="nav-item"><a class="action-link" data-id="<?=Helpers::getMyTaxipark()?>"  href="taxi-parks/form-taxi-park"><i class="icon-office"></i>Настройка таксопарка</a></li>
 
                <?
+           }elseif(Yii::$app->session->get("profile_role") == 7) {
+               ?>
+               <li class="nav-item"><a id = "coworkers" href="coworkers" class = "cs-link"><i class="icon-cash4"></i>Сотрудники компании</a></li>
+               <li class="nav-item"><a data-id=3 data-info="Корпоративный клиент" id = "orders" class="action-link" href="orders/orders-list"><i class="icon-car"></i>Поездки</a></li>
+               <?
            }?>
 
 
@@ -145,12 +150,7 @@ use backend\models\Users;
                 <?php
             }
             ?>
-            <?php
-            if(Yii::$app->session->get("profile_role") == 7) {
-                ?>
-                <li class="nav-item"><a id = "coworkers" href="coworkers" class = "cs-link"><i class="icon-cash4"></i>Сотрудники компании</a></li>
-                <?
-            }?>
+
             <?php
             if(Yii::$app->session->get("profile_role") == 11){
                 ?>

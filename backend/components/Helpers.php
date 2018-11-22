@@ -12,6 +12,10 @@ use Yii;
             $password = substr( str_shuffle( $chars ), 0, 8 );
             return $password;
         }
+        public static function getMyCompany(){
+            $me = SystemUsers::findOne(['id' => Yii::$app->session->get('profile_id')]);
+            return $me->company_id;
+        }
         public static function getCitiesCondition(){
             $me = SystemUsers::findOne(['id' => Yii::$app->session->get('profile_id')]);
             $my_cities = SystemUsersCities::find()->where(['system_user_id' => $me->id])->all();
