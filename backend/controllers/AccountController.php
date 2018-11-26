@@ -195,7 +195,15 @@ class AccountController extends Controller
                 ->innerJoin('car_models as mod', 'users_cars.car_id = mod.id')
                 ->innerJoin('car_models as sub', 'sub.id = mod.parent_id')
                 ->all();
+            if(count($cars) < 1){
+                Yii::$app->response->statusCode = 200;
+                $response["state"] = 'fail';
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return $response;
+
+            }
         }
+
         $user->role_id = $role;
         if($user->save()){
             Yii::$app->response->statusCode = 200;
@@ -287,6 +295,16 @@ class AccountController extends Controller
             $car->body = $json['body'];
         }
         $car->save();
+
+        $cars = (new \yii\db\Query())
+            ->select('users_cars.id, users_cars.car_id, users_cars.seats_number, users_cars.tonns, users_cars.body, users_cars.number, users_cars.year, users_cars.type, mod.model as model, sub.model as submodel')
+            ->from('users_cars')
+            ->where(['user_id' => $model->id])
+            ->andWhere('users_cars.id = ' . $car->id)
+            ->innerJoin('car_models as mod', 'users_cars.car_id = mod.id')
+            ->innerJoin('car_models as sub', 'sub.id = mod.parent_id')
+            ->one();
+
         if($model->save()){
             $ds = new DriversServices();
             $ds-> driver_id = $model->id;
@@ -302,6 +320,8 @@ class AccountController extends Controller
             }
             Yii::$app->response->statusCode = 200;
             $response["state"] = 'success';
+            $response["car"] = $cars;
+
             $response["message"] = 'successfuly registered1';
             Yii::$app->response->format = Response::FORMAT_JSON;
             return $response;
@@ -315,7 +335,7 @@ class AccountController extends Controller
         }
     }
 
-    
+
     public function actionGetFacilities(){
         $all = Facilities::find()->all();
         Yii::$app->response->statusCode = 200;
@@ -385,45 +405,45 @@ class AccountController extends Controller
         $check = TempPass::find()->where(['phone' => $phone])->andWhere(['code' => $code])->one();
 //        if($check != null){
 
-            $user = Users::find()->where(['phone' => $phone])->one();
-            if($user != null){
-                Yii::$app->response->statusCode = 200;
-                $user->token = $auth_key;
-                $user->save();
-                if($user->role_id == 2){
+        $user = Users::find()->where(['phone' => $phone])->one();
+        if($user != null){
+            Yii::$app->response->statusCode = 200;
+            $user->token = $auth_key;
+            $user->save();
+            if($user->role_id == 2){
 
-                    $cars = (new \yii\db\Query())
-                        ->select('users_cars.id, users_cars.car_id, users_cars.seats_number, users_cars.tonns, users_cars.body, users_cars.number, users_cars.year, users_cars.type, mod.model as model, sub.model as submodel')
-                        ->from('users_cars')
-                        ->where(['user_id' => $user->id])
-                        ->innerJoin('car_models as mod', 'users_cars.car_id = mod.id')
-                        ->innerJoin('car_models as sub', 'sub.id = mod.parent_id')
-                        ->all();
-                    $response['cars'] = $cars;
-                }
-                $response["state"] = 'success';
-                $response["type"] = $user->role_id;
-                $response["user"] = $user;
-                $city = Cities::find()->where(['id' => $user->city_id])->one();
-                $response["city"] = $city;
+                $cars = (new \yii\db\Query())
+                    ->select('users_cars.id, users_cars.car_id, users_cars.seats_number, users_cars.tonns, users_cars.body, users_cars.number, users_cars.year, users_cars.type, mod.model as model, sub.model as submodel')
+                    ->from('users_cars')
+                    ->where(['user_id' => $user->id])
+                    ->innerJoin('car_models as mod', 'users_cars.car_id = mod.id')
+                    ->innerJoin('car_models as sub', 'sub.id = mod.parent_id')
+                    ->all();
+                $response['cars'] = $cars;
+            }
+            $response["state"] = 'success';
+            $response["type"] = $user->role_id;
+            $response["user"] = $user;
+            $city = Cities::find()->where(['id' => $user->city_id])->one();
+            $response["city"] = $city;
 
-                $response["token"] = $auth_key;
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return $response;
-            }else{
+            $response["token"] = $auth_key;
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return $response;
+        }else{
 //                $user = new Users();
 //                $user->phone = $phone;
 //                $user->role_id = 1;
 //                $user->token = $auth_key;
 //                $user->created = strtotime("now");
 //                $user->save();
-                Yii::$app->response->statusCode = 200;
-                $response["state"] = 'success';
-                $response["type"] = 0;
-                $response["message"] = 'user not found';
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return $response;
-            }
+            Yii::$app->response->statusCode = 200;
+            $response["state"] = 'success';
+            $response["type"] = 0;
+            $response["message"] = 'user not found';
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return $response;
+        }
 //        }else{
 //            Yii::$app->response->statusCode = 401;
 //            $response["state"] = 'fail';
@@ -487,7 +507,7 @@ class AccountController extends Controller
             return $response;
         }
     }
-        public function actionSignUp(){
+    public function actionSignUp(){
         $auth_key = Yii::$app->security->generateRandomString();
         $phone = $_POST['phone'];
         $name = $_POST['name'];
@@ -821,7 +841,7 @@ class AccountController extends Controller
         $to_lat = $_POST['latitude_b'];
         $from_long = $_POST['longitude_a'];
         $from_lat = $_POST['latitude_a'];
-            $type = $_POST['service_id'];
+        $type = $_POST['service_id'];
         $comment = $_POST['comment'];
         $date = $_POST['date'];
         $pay = $_POST['payment_type'];
@@ -971,9 +991,9 @@ class AccountController extends Controller
             if($order->is_common == 1){
                 $this->sendPushToDriver($order_id, $user, 'Новый Заказ', 'На расстоянии ' . $distance . 'м. от Вас');
             }else{
-                //  if($distance < 1000){
-                $this->sendPushToDriver($order_id, $user, 'Новый Заказ', 'На расстоянии ' . $distance . 'м. от Вас');
-                //  }
+                if($distance < 1000){
+                    $this->sendPushToDriver($order_id, $user, 'Новый Заказ', 'На расстоянии ' . $distance . 'м. от Вас');
+                }
             }
 
         }else{
@@ -1059,35 +1079,36 @@ class AccountController extends Controller
 
         $order = Orders::find()->where(['id' => $order_id])->andWhere(['driver_id' => null])->one();
         $driver = Users::find()->where(['token' => $token])->one();
-            $tp = TaxiPark::find()->where(['id' => $driver->taxi_park_id])->one();
-            $tps = TaxiParkServices::find()->where(['service_id' => $order->order_type])->andWhere(['taxi_park_id' => $tp->id])->one();
-            $percent = $tps->commision_percent;
+        $current_orders = Orders::find()->where(['status' => [1, 2, 3]])->andWhere(['driver_id' => $driver->id])->all();
+        if($current_orders != null){
+            Yii::$app->response->statusCode = 200;
+            $response["state"] = 'exist';
+            $response["message"] = 'че самый умный что ли, у тебя есть заказ';
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return $response;
+        }
+
+        $tp = TaxiPark::find()->where(['id' => $driver->taxi_park_id])->one();
+        $tps = TaxiParkServices::find()->where(['service_id' => $order->order_type])->andWhere(['taxi_park_id' => $tp->id])->one();
+        $percent = $tps->commision_percent;
 
 
         if($order != null){
             if($driver != null){
                 if($driver->role_id == 2){
-                        if($percent != null){
-                            if($driver->balance < $order->price * ($percent/100)){
-                                $response["state"] = 'fail';
-                                $response["message"] = 'ПОПОЛНИ БАЛАHC';
-                                Yii::$app->response->format = Response::FORMAT_JSON;
-                                return $response;
-                            }
-                            else{
-                                // send push
-                                $model = new PossibleDrivers();
-                                $model->driver_id = $driver->id;
-                                $model->order_id = $order_id;
-                                $model->save();
-                                $this->acceptDriver($driver, $order);
+                    if($percent != null){
+                        // send push
+                        $model = new PossibleDrivers();
+                        $model->driver_id = $driver->id;
+                        $model->order_id = $order_id;
+                        $model->save();
+                        $this->acceptDriver($driver, $order);
 
-                            }
-                        }else{
-                            $this->acceptDriver($driver, $order);
+                    }else{
+                        $this->acceptDriver($driver, $order);
 
-                            //return $response;
-                        }
+                        //return $response;
+                    }
 
 //                    }else{
 //                        $model = new PossibleDrivers();
@@ -1141,12 +1162,21 @@ class AccountController extends Controller
 //        $response["order"] = $order;
 //        $response["driver"] = $driver;
 
+        $cars = (new \yii\db\Query())
+            ->select('users_cars.id, users_cars.car_id, users_cars.seats_number, users_cars.tonns, users_cars.body, users_cars.number, users_cars.year, users_cars.type, mod.model as model, sub.model as submodel')
+            ->from('users_cars')
+            ->where(['user_id' => $driver->id])
+            ->andWhere(['users_cars.type' => 1])
+            ->innerJoin('car_models as mod', 'users_cars.car_id = mod.id')
+            ->innerJoin('car_models as sub', 'sub.id = mod.parent_id')
+            ->one();
+
         $users_car = UsersCars::find()->where(['user_id' => $driver->id])->andWhere(['type' => 1])->one();
         $submodel = CarModels::find()->where(['id' => $users_car->car_id])->one();
         $model = CarModels::find()->where(['id' => $submodel->parent_id])->one();
-        $car = $model->model . " " . $submodel->model; 
+        $car = $model->model . " " . $submodel->model;
 
-        $response["car"] = $car;
+        $response["car"] = $cars;
         Yii::$app->response->format = Response::FORMAT_JSON;
         ignore_user_abort(true);
         set_time_limit(0);
@@ -1198,7 +1228,7 @@ class AccountController extends Controller
         $model = CarModels::find()->where(['id' => $submodel->parent_id])->one();
         $car = $model->model . " " . $submodel->model;
         $response["car"] = $cars;
-        
+
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         return $response;
@@ -1281,7 +1311,7 @@ class AccountController extends Controller
         Yii::$app->response->statusCode = 200;
         $response["state"] = 'success';
         Yii::$app->response->format = Response::FORMAT_JSON;
-       return $response;
+        return $response;
     }
 
     public function PaymentFailed($driver, $client){
@@ -1414,7 +1444,7 @@ class AccountController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $server_output = curl_exec ($ch);
         curl_close ($ch);
-        $this->rasschet($client, $order, $driver);
+        // $this->rasschet($client, $order, $driver);
         Yii::$app->response->statusCode = 200;
         $response["state"] = 'success';
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -1853,30 +1883,30 @@ class AccountController extends Controller
             }else{
                 $session->end = $time + (60 * 60 * 12);
             }
-                if($user->balance >= $price ){
-                    if($session->save()){
-                        $log = new MonetsTraffic();
-                        $log->sender_user_id = $user->id;
-                        $log->sender_tp_id = $user->taxi_park_id;
-                        $log->reciever_user_id = 111;
-                        $log->reciever_tp_id = 0;
-                        $log->date = $time;
-                        $log->amount = $price;
-                        $log->type_id = 3;
-                        $log->save();
-                        $user->balance = $user->balance - $price;
-                        $user->save();
+            if($user->balance >= $price ){
+                if($session->save()){
+                    $log = new MonetsTraffic();
+                    $log->sender_user_id = $user->id;
+                    $log->sender_tp_id = $user->taxi_park_id;
+                    $log->reciever_user_id = 111;
+                    $log->reciever_tp_id = 0;
+                    $log->date = $time;
+                    $log->amount = $price;
+                    $log->type_id = 3;
+                    $log->save();
+                    $user->balance = $user->balance - $price;
+                    $user->save();
 
-                        Yii::$app->response->statusCode = 200;
-                        $response["state"] = 'success';
-                        $response["message"] = 'Сессия успешно открыта';
-                        return $response;
-                    }
-            }else{
-                    Yii::$app->response->statusCode = 400;
-                    $response["state"] = 'fail';
+                    Yii::$app->response->statusCode = 200;
+                    $response["state"] = 'success';
+                    $response["message"] = 'Сессия успешно открыта';
                     return $response;
                 }
+            }else{
+                Yii::$app->response->statusCode = 400;
+                $response["state"] = 'fail';
+                return $response;
+            }
         }
         else{
             Yii::$app->response->statusCode = 401;
@@ -1967,10 +1997,11 @@ class AccountController extends Controller
             ->select('users.name, users.phone, orders.from_longitude, orders.to_longitude, orders.to_latitude, orders.from_latitude, orders.id, orders.created, orders.price')
             ->from('orders')
             ->where(['orders.taxi_park_id' => $driver->taxi_park_id])
+            ->innerJoin('users', 'users.id = orders.user_id')
             ->andWhere(['orders.status' => 1])
             ->andWhere(['NOT IN', 'orders.id', $ids])
             ->andWhere(['orders.deleted' => 0])
-            ->innerJoin('users', 'users.id = orders.user_id')
+            ->andWhere(['users.city_id' => $driver->city_id])
             ->all();
 
 
@@ -2020,18 +2051,19 @@ class AccountController extends Controller
         $model = (new \yii\db\Query())
             ->select('users.name, orders.created, users.phone, orders.from_longitude, orders.to_longitude, orders.to_latitude, orders.from_latitude, orders.id, orders.price')
             ->from('orders')
+            ->innerJoin('users', 'users.id = orders.user_id')
             ->where(['orders.taxi_park_id' => 0])
             ->andWhere(['orders.status' => 1])
             ->andWhere(['orders.deleted' => 0])
             ->andWhere(['NOT IN', 'orders.id', $ids])
-            ->innerJoin('users', 'users.id = orders.user_id')
+            ->andWhere(['users.city_id' => $driver->city_id])
             ->all();
         Yii::$app->response->statusCode = 200;
         $response["state"] = 'success';
         $response["orders"] = $model;
         Yii::$app->response->format = Response::FORMAT_JSON;
         return $response;
-        
+
     }
 
     public function actionAddComplaint(){
