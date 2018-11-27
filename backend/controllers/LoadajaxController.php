@@ -4,6 +4,7 @@ namespace backend\controllers;
 use backend\components\Helpers;
 use backend\models\Cities;
 use backend\models\Company;
+use backend\models\Message;
 use backend\models\Orders;
 use backend\models\SystemUsers;
 use backend\models\SystemUsersCities;
@@ -73,6 +74,9 @@ class LoadajaxController extends Controller
                 }
                 else if ($page == "drivers/form-driver") {
                     $model = Users::find()->where(['id' => $id])->one();
+                }
+                else if ($page == "messages/message") {
+                    $model = Message::find()->where(['id' => $id])->one();
                 }
                 else if ($page == "taxi-parks/radial") {
                     $model = TaxiPark::find()->where(['id' => $id])->one();

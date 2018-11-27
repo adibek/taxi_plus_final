@@ -16,6 +16,11 @@ use Yii;
             $me = SystemUsers::findOne(['id' => Yii::$app->session->get('profile_id')]);
             return $me->company_id;
         }
+        public static function getMyTpCity(){
+            $me = SystemUsers::findOne(['id' => Yii::$app->session->get('profile_id')]);
+            $tp = TaxiPark::findOne(['id' => $me->taxi_park_id]);
+            return $tp->city_id;
+        }
         public static function getCitiesCondition(){
             $me = SystemUsers::findOne(['id' => Yii::$app->session->get('profile_id')]);
             $my_cities = SystemUsersCities::find()->where(['system_user_id' => $me->id])->all();

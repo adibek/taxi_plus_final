@@ -39,6 +39,9 @@
             "stats-tp" => "Статистика по таксопаркам",
             "client-stat" => $info,
             "stats-clients" => "Статистика по клиентам",
+            "messages" => "Сообщения",
+            "sent_messages" => "Сообщения",
+            "message" => "Сообщение",
 
         );
     } else {
@@ -80,6 +83,7 @@
             "stats-tp" => "Статистика по таксопаркам",
             "company-stat" => $info,
             "stats-companies" => "Статистика по компаниям",
+            "message" => "Сообщение",
         );
     }
     $bread = '<li><a href="/profile/"><i class="icon-home2 position-left"></i> Главная</a></li>';

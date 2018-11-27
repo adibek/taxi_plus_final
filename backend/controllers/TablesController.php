@@ -661,6 +661,36 @@ class TablesController extends Controller
                     ->offset($start)
                     ->all();
             }
+            else if ($name == "accepted") {
+                $recordsTotal = 0;//SpecificOrders::find()->andWhere($query)->andWhere(['order_type_id' => $_GET['id']])->count();
+                $recordsFiltered = 0;//SpecificOrders::find()->andWhere($condition)->andWhere(['order_type_id' => $_GET['id']])->andWhere($query)->andWhere($search_condition)->count();
+                $model = (new \yii\db\Query())
+                    ->select('messages.*, m2.read, u.first_name, u.last_name')
+                    ->from('messages')
+                    ->where($query)
+                    ->andWhere($condition)
+                    ->innerJoin('message_recievers m2', 'messages.id = m2.message_id')
+                    ->innerJoin('system_users u', 'u.id = messages.sender_id')
+                    ->andWhere(['m2.reciever_id' => Yii::$app->session->get('profile_id')])
+                    ->limit($length)
+                    ->offset($start)
+                    ->all();
+            }
+            else if ($name == "sent") {
+                $recordsTotal = 0;//SpecificOrders::find()->andWhere($query)->andWhere(['order_type_id' => $_GET['id']])->count();
+                $recordsFiltered = 0;//SpecificOrders::find()->andWhere($condition)->andWhere(['order_type_id' => $_GET['id']])->andWhere($query)->andWhere($search_condition)->count();
+                $model = (new \yii\db\Query())
+                    ->select('messages.*, u.first_name, u.last_name')
+                    ->from('messages')
+                    ->where($query)
+                    ->andWhere($condition)
+                    ->innerJoin('system_users u', 'u.id = messages.sender_id')
+                    ->andWhere(['messages.sender_id' => Yii::$app->session->get('profile_id')])
+                    ->limit($length)
+                    ->offset($start)
+                    ->groupBy(['messages.id'])
+                    ->all();
+            }
             else if ($name == "clients") {
                 $cond = 'users.id IS NOT NULL';
                 if(Helpers::getMyRole() == 4 OR Helpers::getMyRole() == 5){

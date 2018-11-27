@@ -35,8 +35,6 @@ var lob = null;
         ymaps.ready(init);
 
         function init() {
-            // Стоимость за километр.
-
             var geolocation = ymaps.geolocation,
                 myMap = new ymaps.Map('map', {
                     center: [55, 34],
@@ -128,6 +126,8 @@ var lob = null;
                                 balloonContentLayout = ymaps.templateLayoutFactory.createClass(
                                     '<span>Расстояние: ' + length.text + '.</span><br/>' +
                                     '<span style="font-weight: bold; font-style: italic"> Cost: ' + price + ' tg. </span>' + '<br>' +
+                                    '<label class="text-semibold">Введите сотовый номер телефона клиента (пример: 77005554797)</label>' + '<br>' +
+                                    '<input class="form-control" name="phone" id="phone" placeholder="77005554797">' + '<br>' +
                                     '<button type="button" onclick="makeOrder(laa, loa, lab, lob, token)" class="btn btn-primary"> Oформить заказ </button>');
                                 // Зададим этот макет для содержимого балуна.
                                 route.options.set('routeBalloonContentLayout', balloonContentLayout);
@@ -161,12 +161,16 @@ var lob = null;
     }, 3000);
 
 function makeOrder(laa, loa, lab, lob, tok) {
+    var phone = document.getElementById('phone').value;
+    if(phone == "" || phone == null){
+        alert('Введите номер телефона')
+    }
     $.ajax({
         dataType: "json",
         type: "POST",
         url: "/profile/account/make-order/",
         data: {token: tok, longitude_a: loa, latitude_a: laa,
-            longitude_b: lob, latitude_b: lab, service_id: 1},
+            longitude_b: lob, latitude_b: lab, service_id: 1, phone: phone},
         success: function (data) {
             console.log(data);
             if(data.state == 'success'){
@@ -176,7 +180,7 @@ function makeOrder(laa, loa, lab, lob, tok) {
                     type: 'success',
                     showConfirmButton: false
                 });
-                $('#').trigger('click');
+                $('#add_order').trigger('click');
 
             }
 

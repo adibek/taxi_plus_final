@@ -5,6 +5,7 @@ use backend\models\Payment;
 use backend\models\Cities;
 use backend\models\Company;
 use backend\models\MonetsTraffic;
+use backend\models\SystemUsers;
 use backend\models\UsersAvatars;
 use backend\models\Log;
 
@@ -42,7 +43,7 @@ use backend\models\Privileges;
 use backend\models\IntercityOrder;
 use backend\models\IntercityOrdersClient;
 use yii\rest\ActiveController;
-
+use yii\web\User;
 
 
 class AccountController extends Controller
@@ -640,12 +641,18 @@ class AccountController extends Controller
 
         $user = Users::find()->where(['token' => $token])->one();
         if($user == null){
-            Yii::$app->response->statusCode = 401;
-            $response["state"] = 'fail';
-            $response["message"] = 'Invalid token';
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return $response;
+            $user = SystemUsers::find()->where(['token' => $token])->one();
+            if($user == null){
+                Yii::$app->response->statusCode = 401;
+                $response["state"] = 'fail';
+                $response["message"] = 'Invalid token';
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return $response;
+            }else{
+                goto continue_order;
+            }
         }else{
+            continue_order:
             $tp = $user->taxi_park_id;
             $arr = array();
             if($type == 2){
@@ -850,6 +857,19 @@ class AccountController extends Controller
 
         if($token != null AND $to_lat != null AND $to_long != null AND $from_lat != null AND $from_long != null){
             $user = Users::find()->where(['token' => $token])->one();
+            if($_POST['phone'] != null){
+                $user = Users::findOne(['phone' => $_POST['phone']]);
+                if($user == null){
+                    $user = new Users();
+                    $user->phone = $_POST['phone'];
+                    $user->role_id = 1;
+                    $user->city_id = Helpers::getMyTpCity();
+                    $user->is_active = 1;
+                    $user->balance = 0;
+                    $user->taxi_park_id = Helpers::getMyTaxipark();
+                    $user->save();
+                }
+            }
 
             if($user != null){
                 if($user->is_active != 1){
@@ -859,18 +879,32 @@ class AccountController extends Controller
                     Yii::$app->response->format = Response::FORMAT_JSON;
                     return $response;
                 }
-
+                if($pay == 3){
+                    // TODO: доделать оплату бонусами
+                }
                 $order = new Orders();
-                $price = $this->getPrice($token, $from_long, $from_lat, $to_long, $to_lat, $type);
+                $order->comment = $comment;
+
+                if($type == 5){
+                    $price = 500;
+                    $order->comment = $_POST['kpp'] . " " . $_POST['comment'];
+                }else{
+                    $price = $this->getPrice($token, $from_long, $from_lat, $to_long, $to_lat, $type);
+                }
+
                 $order->user_id = $user->id;
                 $order->from_latitude = $from_lat;
                 $order->from_longitude = $from_long;
                 $order->to_latitude = $to_lat;
                 $order->to_longitude = $to_long;
                 $order->order_type = $type;
-                $order->comment = $comment;
                 $order->price = $price;
-                $order->payment_type = $pay;
+                if($pay != null){
+                    $order->payment_type = $pay;
+                }else{
+                    $order->payment_type = 1;
+                }
+
                 $order->status = 1;
                 $order->created = strtotime('now');
                 $order->taxi_park_id = $user->taxi_park_id;
@@ -954,6 +988,7 @@ class AccountController extends Controller
                 }
 
             }else{
+
                 Yii::$app->response->statusCode = 401;
 
                 $response["state"] = 'fail';
@@ -2518,10 +2553,6 @@ class AccountController extends Controller
         return $response;
     }
 
-
-
-
-
     function updateRating($driver_id){
         $all_ratings = DriversRatings::find()->where(['driver_id' => $driver_id])->all();
         $count = count($all_ratings);
@@ -2535,6 +2566,14 @@ class AccountController extends Controller
         $driver->save();
     }
 
+
+    public function actionGetTrezvyPrice(){
+        Yii::$app->response->statusCode = 200;
+        $response["state"] = 'success';
+        $response["price"] = 500;
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return $response;
+    }
     // log
     function rasschet($client, $order, $driver){
         // check if driver have open session

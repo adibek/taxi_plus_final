@@ -11,6 +11,7 @@ use backend\models\RadialPricing;
 <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 <!---LOCAL --->
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
 <script type="text/javascript" src="/profile/files/js/mytables/taxi-parks/form.js"></script>
 <!------->
 
@@ -359,9 +360,6 @@ $my_services = TaxiParkServices::find()->where(['taxi_park_id' => $model->id])->
 
     $(document).ready(function() {
         $("[name='access']").bootstrapSwitch();
-
-
-
     });
 
     function deleteDiv(rand){
@@ -452,7 +450,61 @@ $my_services = TaxiParkServices::find()->where(['taxi_park_id' => $model->id])->
 
     }
 
+
+
+
     function appendRadial(rand) {
+
+
+        var bigDiv = document.getElementById('bigDiv' + rand);
+        var label = document.createElement('label');
+        label.classList.toggle('text-semibold');
+        label.innerText = 'Метры:';
+        label.id = 'meters' + rand;
+        bigDiv.appendChild(label);
+        // bigDiv.appendChild(input);
+
+        var geolocation = ymaps.geolocation,
+            myMap = new ymaps.Map("bigDiv" + rand, {
+                center: [43.24, 76.92],
+                zoom: 10,
+                controls: []
+            });
+        var myCircle = new ymaps.Circle([
+
+            [43.24, 76.92],
+
+            10000
+        ], {}, {
+            fillColor: "#DB709377",
+            strokeColor: "#990066",
+            strokeOpacity: 0.8,
+            strokeWidth: 5
+        });
+
+        myMap.geoObjects.add(myCircle);
+
+        myCircle.editor.startEditing();
+        geolocation.get({
+            provider: 'yandex',
+            mapStateAutoApply: true
+        }).then(function (result) {
+            // result.geoObjects.options.set('preset', 'islands#redCircleIcon');
+            // result.geoObjects.get(0).properties.set({
+            //     balloonContentBody: 'Мое местоположение'
+            // });
+            // myMap.geoObjects.add(result.geoObjects);
+
+        });
+        // myCircle.geometry.setRadius(document.getElementById('meters').value);
+
+        myCircle.events.add('geometrychange', function () {
+            var i = document.getElementById('meters' + rand);
+            i.innerText = 'Метры: ' + myCircle.geometry.getRadius();
+        });
+
+
+
         var random =  Math.floor(Math.random() * 30) + 1;
         var radialDiv = document.createElement('div');
         radialDiv.classList.toggle('col-md-12');
@@ -520,9 +572,6 @@ $my_services = TaxiParkServices::find()->where(['taxi_park_id' => $model->id])->
 
         var bigDiv = document.getElementById('bigDiv' + rand);
         bigDiv.appendChild(radialDiv);
-
-
-
     }
 
     function trya(id) {
@@ -532,9 +581,11 @@ $my_services = TaxiParkServices::find()->where(['taxi_park_id' => $model->id])->
 
         if(is_km){
             var radial = document.getElementById('radial' + id).remove();
+            // bigDiv.removeChild(radial);
             appendKm(id);
         }else{
             var km = document.getElementById('km' + id).remove();
+            // bigDiv.removeChild(km);
             appendRadial(id);
 
         }

@@ -64,6 +64,9 @@ class SiteController extends Controller
                foreach ($cities as $k => $v){
                    array_push($id, $v->id);
                }
+               $profile->token = Yii::$app->security->generateRandomString(40);
+               $profile->save();
+               Yii::$app->session->set('token', $profile->token);
                Yii::$app->session->set('profile_auth', 'OK');
                Yii::$app->session->set('profile_id', $profile->id);
                Yii::$app->session->set('profile_tp', $profile->taxi_park_id);

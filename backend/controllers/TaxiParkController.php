@@ -49,9 +49,6 @@ class TaxiParkController extends Controller
                     ->execute();
 
                 foreach ($_POST['service'] as $key => $value){
-
-
-
                     if($_POST['call'][$key] != null){
                         $tps = new TaxiParkServices();
                         $tps->session_price = $_POST['session_price'][$key];
