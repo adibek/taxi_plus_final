@@ -42,7 +42,12 @@
             "messages" => "Сообщения",
             "sent_messages" => "Сообщения",
             "message" => "Сообщение",
-
+            "regions" => "Регионы",
+            "cities" => "Города",
+            "cars" => "Марки автомобилей",
+            "submodels" => "Модели",
+            "form-city" => "Добавить город",
+            "form-region" => "Добавить регион",
         );
     } else {
         $links = array(
@@ -84,6 +89,12 @@
             "company-stat" => $info,
             "stats-companies" => "Статистика по компаниям",
             "message" => "Сообщение",
+            "regions" => "Регионы",
+            "cities" => "Города",
+            "form-region" => "Добавить регион",
+            "form-city" => "Добавить город",
+            "cars" => "Марки автомобилей",
+            "submodels" => "Модели",
         );
     }
     $bread = '<li><a href="/profile/"><i class="icon-home2 position-left"></i> Главная</a></li>';

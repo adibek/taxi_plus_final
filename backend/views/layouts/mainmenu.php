@@ -127,6 +127,17 @@ use backend\models\Users;
 
                 </ul>
             </li>
+
+            <?
+            if(Helpers::getMyRole() == 9)
+            {
+                ?>
+                <li class="nav-item"><a id = "regions" href="regions" class = "cs-link"><i class="icon-city"></i>Регионы</a></li>
+                <li class="nav-item"><a id = "cars" href="cars" class = "cs-link"><i class="icon-city"></i>Марки автомобилей</a></li>
+
+                <?
+            }
+            ?>
         </ul>
     </div>
 

@@ -1,6 +1,17 @@
 <!--<script type="text/javascript" src="/profile/files/js/mytables/orders/index.js"></script>-->
 
-<?=$this->render("/layouts/header/_header")?>
+<?//=$this->render("/layouts/header/_header")?>
+<script type="text/javascript" src="/profile/files/js/mytables/filtr.js"></script>
+
+<div class="navbar navbar-default navbar-xs navbar-component" style = "margin-bottom:0;">
+    <div class="navbar-collapse collapse" id="navbar-filter">
+        <p class="navbar-text">Фильтр:</p>
+        <li class="dropdown">
+            <a href="#"  class="daterange-picker filtr-toggle dropdown-toggle"><i class="icon-calendar" position-left"></i> Сортировать по дате <span class="caret"></span></a>
+        </li>
+    </div>
+</div>
+
 <?
 use backend\components\Helpers;
 ?>
@@ -141,3 +152,50 @@ use backend\components\Helpers;
     </div>
 </div>
 
+<script>
+    $(function() {
+        var token = $('meta[name=csrf-token]').attr("content");
+        $('.daterange-picker').daterangepicker(
+            {
+                startDate: <? if ($array_filtr[$page][$global_key]['start'] != null) { echo '"'.date("d/m/y", $array_filtr[$page][$global_key]['start']).'"'; } else { ?>moment().subtract(29, 'days')<? } ?>,
+                endDate: <? if ($array_filtr[$page][$global_key]['end'] != null) { echo '"'.date("d/m/y", $array_filtr[$page][$global_key]['end']).'"'; } else { ?>moment()<? } ?>,
+                dateLimit: { days: 120 },
+                ranges: {
+                    'Сегодня': [moment(), moment()],
+                    'Вчера': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Последние 7 дней': [moment().subtract(6, 'days'), moment()],
+                    'Последние 30 дней': [moment().subtract(29, 'days'), moment()],
+                    'Этот месяц': [moment().startOf('month'), moment().endOf('month')],
+                    'Прошедший месяц': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                locale: {
+                    format: 'DD/MM/YYYY',
+                    applyLabel: 'Вперед',
+                    cancelLabel: 'Отмена',
+                    startLabel: 'Начальная дата',
+                    endLabel: 'Конечная дата',
+                    customRangeLabel: 'Выбрать дату',
+                    daysOfWeek: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт','Сб'],
+                    monthNames: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+                    firstDay: 1
+                },
+                opens: 'right',
+                applyClass: 'btn-small bg-primary',
+                cancelClass: 'btn-small btn-default'
+            },
+            function(start, end) {
+                $.ajax({
+                    type: "POST",
+                    url: "/profile/tables/filtrdate/",
+                    data:{"_csrf-backend":token, page:"<?=$page?>", field:"<?=$global_key?>", start:start.format('DD.MM.YYYY HH:MM'), end:end.format('DD.MM.YYYY HH:MM')},
+                    success: function() {
+                        $('#<?=$page?>').trigger('click');
+                    },
+                }).fail(function (xhr) {
+                    console.log(xhr. responseText);
+                });
+            },
+        );
+
+    });
+</script>

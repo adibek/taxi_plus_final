@@ -922,7 +922,11 @@ class AccountController extends Controller
 
                 if($order->save()){
                     // ask drivers
-                    $all_drivers = Users::find()->where(['taxi_park_id' => $order->taxi_park_id])->andWhere(['role_id' => 2])->all();
+                    if($type == 4){
+                        $all_drivers = Users::find()->where(['taxi_park_id' => $order->taxi_park_id])->andWhere(['role_id' => 2])->andWhere(['gender_id' => 1])->all();
+                    }else{
+                        $all_drivers = Users::find()->where(['taxi_park_id' => $order->taxi_park_id])->andWhere(['role_id' => 2])->all();
+                    }
                     $this->sendSilentToDrivers($order->id, $all_drivers, $user, "Первоначальный пуш для определения дистанции");
 
                     Yii::$app->response->statusCode = 200;
@@ -2027,17 +2031,31 @@ class AccountController extends Controller
             array_push($ids, $v->order_id);
         }
         Yii::$app->response->statusCode = 200;
+        if($driver->gender_id == 1){
+            $model = (new \yii\db\Query())
+                ->select('users.name, users.phone, orders.from_longitude, orders.to_longitude, orders.to_latitude, orders.from_latitude, orders.id, orders.created, orders.price')
+                ->from('orders')
+                ->where(['orders.taxi_park_id' => $driver->taxi_park_id])
+                ->innerJoin('users', 'users.id = orders.user_id')
+                ->andWhere(['orders.status' => 1])
+                ->andWhere(['NOT IN', 'orders.id', $ids])
+                ->andWhere(['orders.deleted' => 0])
+                ->andWhere(['users.city_id' => $driver->city_id])
+                ->all();
+        }else{
+            $model = (new \yii\db\Query())
+                ->select('users.name, users.phone, orders.from_longitude, orders.to_longitude, orders.to_latitude, orders.from_latitude, orders.id, orders.created, orders.price')
+                ->from('orders')
+                ->where(['orders.taxi_park_id' => $driver->taxi_park_id])
+                ->innerJoin('users', 'users.id = orders.user_id')
+                ->andWhere(['orders.status' => 1])
+                ->andWhere(['NOT IN', 'orders.id', $ids])
+                ->andWhere('orders.order_type <> 4')
+                ->andWhere(['orders.deleted' => 0])
+                ->andWhere(['users.city_id' => $driver->city_id])
+                ->all();
 
-        $model = (new \yii\db\Query())
-            ->select('users.name, users.phone, orders.from_longitude, orders.to_longitude, orders.to_latitude, orders.from_latitude, orders.id, orders.created, orders.price')
-            ->from('orders')
-            ->where(['orders.taxi_park_id' => $driver->taxi_park_id])
-            ->innerJoin('users', 'users.id = orders.user_id')
-            ->andWhere(['orders.status' => 1])
-            ->andWhere(['NOT IN', 'orders.id', $ids])
-            ->andWhere(['orders.deleted' => 0])
-            ->andWhere(['users.city_id' => $driver->city_id])
-            ->all();
+        }
 
 
         $response["state"] = 'success';
@@ -2083,16 +2101,31 @@ class AccountController extends Controller
         foreach ($rejected as $k => $v){
             array_push($ids, $v->order_id);
         }
-        $model = (new \yii\db\Query())
-            ->select('users.name, orders.created, users.phone, orders.from_longitude, orders.to_longitude, orders.to_latitude, orders.from_latitude, orders.id, orders.price')
-            ->from('orders')
-            ->innerJoin('users', 'users.id = orders.user_id')
-            ->where(['orders.taxi_park_id' => 0])
-            ->andWhere(['orders.status' => 1])
-            ->andWhere(['orders.deleted' => 0])
-            ->andWhere(['NOT IN', 'orders.id', $ids])
-            ->andWhere(['users.city_id' => $driver->city_id])
-            ->all();
+        if($driver->gender_id == 1){
+            $model = (new \yii\db\Query())
+                ->select('users.name, orders.created, users.phone, orders.from_longitude, orders.to_longitude, orders.to_latitude, orders.from_latitude, orders.id, orders.price')
+                ->from('orders')
+                ->innerJoin('users', 'users.id = orders.user_id')
+                ->where(['orders.taxi_park_id' => 0])
+                ->andWhere(['orders.status' => 1])
+                ->andWhere(['orders.deleted' => 0])
+                ->andWhere(['NOT IN', 'orders.id', $ids])
+                ->andWhere(['users.city_id' => $driver->city_id])
+                ->all();
+        }else{
+            $model = (new \yii\db\Query())
+                ->select('users.name, orders.created, users.phone, orders.from_longitude, orders.to_longitude, orders.to_latitude, orders.from_latitude, orders.id, orders.price')
+                ->from('orders')
+                ->innerJoin('users', 'users.id = orders.user_id')
+                ->where(['orders.taxi_park_id' => 0])
+                ->andWhere(['orders.status' => 1])
+                ->andWhere('orders.order_type <> 4')
+                ->andWhere(['orders.deleted' => 0])
+                ->andWhere(['NOT IN', 'orders.id', $ids])
+                ->andWhere(['users.city_id' => $driver->city_id])
+                ->all();
+        }
+
         Yii::$app->response->statusCode = 200;
         $response["state"] = 'success';
         $response["orders"] = $model;

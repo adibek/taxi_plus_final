@@ -2,10 +2,12 @@
 namespace backend\controllers;
 
 use backend\components\Helpers;
+use backend\models\CarModels;
 use backend\models\Cities;
 use backend\models\Company;
 use backend\models\Message;
 use backend\models\Orders;
+use backend\models\Region;
 use backend\models\SystemUsers;
 use backend\models\SystemUsersCities;
 use yii\web\Response;
@@ -83,6 +85,12 @@ class LoadajaxController extends Controller
                 }
                 else if ($page == "companies/form-company") {
                     $model = Company::find()->where(['id' => $id])->one();
+                }
+                else if ($page == "cities/index") {
+                    $model = Region::find()->where(['id' => $id])->one();
+                }
+                else if ($page == "cars/submodels") {
+                    $model = CarModels::find()->where(['id' => $id])->one();
                 }
                 else if ($page == "stats-tp/tp-stat") {
                     $model = TaxiPark::find()->where(['id' => $id])->one();

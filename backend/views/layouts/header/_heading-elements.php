@@ -32,6 +32,22 @@
             <a data-id = "0" href="coworkers/add_user.php" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить сотрудника<span class="legitRipple-ripple"></span></a>
         <? } else if($page == "dispatchers"){?>
             <a data-id = "0" href="dispatchers/form-dispatcher" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить диспетчера<span class="legitRipple-ripple"></span></a>
-        <? } ?>
+        <? } else if($page == "regions"){?>
+            <a data-id = "0" href="regions/form-region" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить регион <span class="legitRipple-ripple"></span></a>
+            <?
+        }  else if($page == "cities/index"){?>
+            <a data-id = "0" href="cities/form-city" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить населенный пункт<span class="legitRipple-ripple"></span></a>
+
+        <?} else if($page == 'cars'){
+            ?>
+            <a data-id = "0" href="cars/form-model" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить марку<span class="legitRipple-ripple"></span></a>
+
+            <?
+        } else if($page == 'cars/submodels'){
+            ?>
+            <a data-id = "0" href="cars/form-submodel" class="action-link btn bg-success btn-labeled heading-btn legitRipple"><b><i class="icon-plus2"></i></b> Добавить модель<span class="legitRipple-ripple"></span></a>
+
+            <?
+        }?>
     </div>
 </div>

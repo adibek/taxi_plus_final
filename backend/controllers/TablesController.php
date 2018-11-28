@@ -1,5 +1,6 @@
 <?php
 namespace backend\controllers;
+use backend\models\CarModels;
 use backend\models\Company;
 use backend\models\SpecificOrders;
 use backend\models\SystemUsers;
@@ -672,6 +673,61 @@ class TablesController extends Controller
                     ->innerJoin('message_recievers m2', 'messages.id = m2.message_id')
                     ->innerJoin('system_users u', 'u.id = messages.sender_id')
                     ->andWhere(['m2.reciever_id' => Yii::$app->session->get('profile_id')])
+                    ->limit($length)
+                    ->offset($start)
+                    ->all();
+            }
+            else if ($name == "regions") {
+                $recordsTotal = 0;//SpecificOrders::find()->andWhere($query)->andWhere(['order_type_id' => $_GET['id']])->count();
+                $recordsFiltered = 0;//SpecificOrders::find()->andWhere($condition)->andWhere(['order_type_id' => $_GET['id']])->andWhere($query)->andWhere($search_condition)->count();
+                $model = (new \yii\db\Query())
+                    ->select('regions.*, count(distinct c.id) as amount')
+                    ->from($table)
+                    ->where($query)
+                    ->andWhere($condition)
+                    ->leftJoin('cities c', 'regions.id = c.region_id')
+                    ->limit($length)
+                    ->offset($start)
+                    ->groupBy('regions.id')
+                    ->all();
+            }
+            else if ($name == "cities") {
+                $recordsTotal = 0;//SpecificOrders::find()->andWhere($query)->andWhere(['order_type_id' => $_GET['id']])->count();
+                $recordsFiltered = 0;//SpecificOrders::find()->andWhere($condition)->andWhere(['order_type_id' => $_GET['id']])->andWhere($query)->andWhere($search_condition)->count();
+                $model = (new \yii\db\Query())
+                    ->select('*')
+                    ->from($table)
+                    ->where($query)
+                    ->andWhere(['region_id' => $_GET['id']])
+                    ->andWhere($condition)
+                    ->limit($length)
+                    ->offset($start)
+                    ->all();
+            }
+            else if ($name == "cars") {
+                $recordsTotal = CarModels::find()->andWhere($query)->andWhere(['parent_id' => -1])->count();
+                $recordsFiltered = CarModels::find()->andWhere($condition)->andWhere(['parent_id' => -1])->andWhere($query)->andWhere($search_condition)->count();
+                $model = (new \yii\db\Query())
+                    ->select('car_models.id, car_models.model, count(model.id) as amount')
+                    ->from("car_models")
+                    ->where($query)
+                    ->leftJoin('car_models model', 'model.parent_id = car_models.id')
+                    ->andWhere($condition)
+                    ->andWhere('car_models.parent_id = -1')
+                    ->limit($length)
+                    ->offset($start)
+                    ->groupBy('car_models.id')
+                    ->all();
+            }
+            else if ($name == "models") {
+                $recordsTotal = CarModels::find()->andWhere($query)->andWhere(['parent_id' => $_GET['id']])->count();
+                $recordsFiltered = CarModels::find()->andWhere($condition)->andWhere(['parent_id' => $_GET['id']])->andWhere($query)->andWhere($search_condition)->count();
+                $model = (new \yii\db\Query())
+                    ->select('*')
+                    ->from("car_models")
+                    ->where($query)
+                    ->andWhere($condition)
+                    ->andWhere('car_models.parent_id = ' . $_GET['id'])
                     ->limit($length)
                     ->offset($start)
                     ->all();
